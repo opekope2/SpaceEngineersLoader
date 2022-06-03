@@ -12,15 +12,20 @@ using System.Text.Json;
 using Mono.Cecil;
 
 RootCommand cmd = new RootCommand("Space Engineers Dependency Portability Analyzer");
-cmd.AddOption(new Option<FileSystemInfo>(new[] { "-a", "--assembly" }, "Add an assembly from a file or all assemblies from a folder") { Arity = ArgumentArity.OneOrMore });
-cmd.AddOption(new Option<FileSystemInfo>(new[] { "-f", "--find" }, "Find references in analyzed assemblies") { Arity = ArgumentArity.OneOrMore });
-cmd.AddOption(new Option<FileInfo>(new[] { "-o", "--output" }, "Set output file"));
-cmd.AddOption(new Option<bool>(new[] { "-p", "--pinvoke" }, "List all P/Invoke uses"));
-//cmd.AddOption(new Option<bool>(new[] { "-d", "--dependencies" }, "Analyze dependencies as well"));
-cmd.Handler = CommandHandler.Create(ProcessArgs);
+Command analyze = new Command("analyze", "Analyze input assemblies")
+{
+    new Option<FileSystemInfo>(new[] { "-a", "--assembly" }, "Add an assembly from a file or all assemblies from a folder") { Arity = ArgumentArity.OneOrMore },
+    new Option<FileSystemInfo>(new[] { "-f", "--find" }, "Find references in analyzed assemblies") { Arity = ArgumentArity.OneOrMore },
+    new Option<FileInfo>(new[] { "-o", "--output" }, "Set output file"),
+    new Option<bool>(new[] { "-p", "--pinvoke" }, "List all P/Invoke uses"),
+    //new Option<bool>(new[] { "-d", "--dependencies" }, "Analyze dependencies as well"),
+};
+analyze.Handler = CommandHandler.Create(Analyze);
+
+cmd.AddCommand(analyze);
 cmd.Invoke(Args.ToArray());
 
-void ProcessArgs(List<FileSystemInfo> assembly, List<string> find, FileInfo output, bool pinvoke)
+void Analyze(List<FileSystemInfo> assembly, List<string> find, FileInfo output, bool pinvoke)
 {
     Data_Analysis analysis = new Data_Analysis
     {

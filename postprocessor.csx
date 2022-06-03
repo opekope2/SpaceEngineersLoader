@@ -11,18 +11,19 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Mono.Cecil;
 
-RootCommand cmd = new RootCommand("Space Engineers Dependency Portability Analyzer");
+RootCommand cmd = new RootCommand("Space Engineers Dependency Portability Analyzer Post-Processor");
 Command listPinvoke = new Command("list-pinvokes", "Lists P/Invoke calls to a library => function array map.")
 {
     new Argument("analysis", "Output of analyzer.csx"),
+    //new Option<FileSystemInfo>(new[] { "-a", "--analysis" }, "Add an assembly from a file or all assemblies from a folder"),
     new Option<FileInfo>(new[] { "-o", "--output" }, "Set output file"),
 };
-listPinvoke.Handler = CommandHandler.Create(ProcessArgs);
+listPinvoke.Handler = CommandHandler.Create(ListPInvokes);
 cmd.AddCommand(listPinvoke);
 
 cmd.Invoke(Args.ToArray());
 
-void ProcessArgs(string analysis, FileInfo output, bool pinvoke)
+void ListPInvokes(string analysis, FileInfo output, bool pinvoke)
 {
     FileInfo analysis2 = new FileInfo(analysis);
 
