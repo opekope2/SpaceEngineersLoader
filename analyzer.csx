@@ -18,6 +18,7 @@ Command analyze = new Command("analyze", "Analyze input assemblies")
     new Option<FileSystemInfo>(new[] { "-f", "--find" }, "Find references in analyzed assemblies") { Arity = ArgumentArity.OneOrMore },
     new Option<FileInfo>(new[] { "-o", "--output" }, "Set output file"),
     new Option<bool>(new[] { "-p", "--pinvoke" }, "List all P/Invoke uses"),
+    new Option<bool>(new[] { "-P", "--pretty-print" }, "Pretty-print output JSON"),
     //new Option<bool>(new[] { "-d", "--dependencies" }, "Analyze dependencies as well"),
 };
 analyze.Handler = CommandHandler.Create(Analyze);
@@ -25,7 +26,8 @@ analyze.Handler = CommandHandler.Create(Analyze);
 cmd.AddCommand(analyze);
 cmd.Invoke(Args.ToArray());
 
-void Analyze(List<FileSystemInfo> assembly, List<string> find, FileInfo output, bool pinvoke)
+#region Analyze
+void Analyze(List<FileSystemInfo> assembly, List<string> find, FileInfo output, bool pinvoke, bool prettyPrint)
 {
     Data_Analysis analysis = new Data_Analysis
     {
@@ -66,11 +68,11 @@ void Analyze(List<FileSystemInfo> assembly, List<string> find, FileInfo output, 
 
     if (output == null || output.Name == "-")
     {
-        Console.WriteLine(JsonSerializer.Serialize(analysis, new JsonSerializerOptions { WriteIndented = true }));
+        Console.WriteLine(JsonSerializer.Serialize(analysis, new JsonSerializerOptions { WriteIndented = prettyPrint }));
     }
     else
     {
-        File.WriteAllBytes(output.FullName, JsonSerializer.SerializeToUtf8Bytes(analysis, new JsonSerializerOptions { WriteIndented = true }));
+        File.WriteAllBytes(output.FullName, JsonSerializer.SerializeToUtf8Bytes(analysis, new JsonSerializerOptions { WriteIndented = prettyPrint }));
     }
 }
 
@@ -330,6 +332,7 @@ Data_MemberDefinition AnalyzeMethod(MethodReference method, List<string> find)
 
     return def;
 }
+#endregion
 
 static class AssemblyLoader
 {

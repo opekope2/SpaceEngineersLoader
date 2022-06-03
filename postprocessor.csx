@@ -17,13 +17,14 @@ Command listPinvoke = new Command("list-pinvokes", "Lists P/Invoke calls to a li
     new Argument("analysis", "Output of analyzer.csx"),
     //new Option<FileSystemInfo>(new[] { "-a", "--analysis" }, "Add an assembly from a file or all assemblies from a folder"),
     new Option<FileInfo>(new[] { "-o", "--output" }, "Set output file"),
+    new Option<bool>(new[] { "-P", "--pretty-print" }, "Pretty-print output JSON"),
 };
 listPinvoke.Handler = CommandHandler.Create(ListPInvokes);
 cmd.AddCommand(listPinvoke);
 
 cmd.Invoke(Args.ToArray());
 
-void ListPInvokes(string analysis, FileInfo output, bool pinvoke)
+void ListPInvokes(string analysis, FileInfo output, bool pinvoke, bool prettyPrint)
 {
     FileInfo analysis2 = new FileInfo(analysis);
 
@@ -81,10 +82,10 @@ void ListPInvokes(string analysis, FileInfo output, bool pinvoke)
 
     if (output == null || output.Name == "-")
     {
-        Console.WriteLine(JsonSerializer.Serialize(map, new JsonSerializerOptions { WriteIndented = true }));
+        Console.WriteLine(JsonSerializer.Serialize(map, new JsonSerializerOptions { WriteIndented = prettyPrint }));
     }
     else
     {
-        File.WriteAllBytes(output.FullName, JsonSerializer.SerializeToUtf8Bytes(map, new JsonSerializerOptions { WriteIndented = true }));
+        File.WriteAllBytes(output.FullName, JsonSerializer.SerializeToUtf8Bytes(map, new JsonSerializerOptions { WriteIndented = prettyPrint }));
     }
 }
