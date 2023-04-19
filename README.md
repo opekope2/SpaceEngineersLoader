@@ -1,4 +1,6 @@
-# SpaceEngineers4Linux
+# SpaceEngineersLoader
+
+This comes with absolutely no warranty. Please do not report bugs to Keen if using this.
 
 ## What is this?
 
@@ -8,47 +10,15 @@ Experiments to run Space Engineers on .NET. Related experiment: [SpaceEngineers4
 
 1. I recommend using [JetBrains Rider](https://www.jetbrains.com/rider/)
 2. Install .NET 6 SDK
-3. Open `Loader/Loader.csproj` and add your Space Engineers Bin64 path in between `<SpaceEngineersBin64></SpaceEngineersBin64>`
-4. Build and publish project `dotnet publish Loader -c Release -o dist -r win-x64 --self-contained` (you can do `-c Debug`)
-5. Open `/loader.py` and edit the published loader path on line 14 (Linux-only)
-6. Set steam launch options to `C:\path\to\SpaceEngineersLoader\dist\Loader.exe %command%` (Windows) or `/path/to/SpaceEngineersLoader/dist/loader.py %command%` (Linux). I recommend testing without any options, since this is an experiment
-7. Start Space Engineers
+3. Open `Loader.csproj` and add your Space Engineers Bin64 path in between `<SpaceEngineersBin64></SpaceEngineersBin64>`
+4. Build and publish project `dotnet publish -c Release -o dist -r win-x64 --self-contained` (you can do `-c Debug`)
+5. Create a folder named `Loader` in the game's `Bin64` folder
+6. Copy the content of the `dist` foldder to the `Loader` folder you just created
+7. Copy `SpaceEngineersLoader.py` into the game's `Bin64` folder (Linux-only)
+8. Set steam launch options to `Loader\SpaceEngineersLoader.exe %command%` (Windows) or `./SpaceEngineersLoader.py %command%` (Linux). I recommend testing without any options, since this is an experiment
+9. Start Space Engineers
 
 ## What is the furthest point the game runs?
 
-Past splash screen, when it crashes. This doesn't happen on .NET Framework 4.8.
-
-```
-System.NullReferenceException: Object reference not set to an instance of an object.
-   at Sandbox.Definitions.MyDefinitionManager.InitDefinition[T](MyModContext context, MyObjectBuilder_DefinitionBase builder)
-   at Sandbox.Definitions.MyDefinitionManager.InitScenarioDefinitions(MyModContext context, DefinitionDictionary`1 outputDefinitions, List`1 outputScenarios, MyObjectBuilder_ScenarioDefinition[] scenarios, Boolean failOnDebug)
-   at Sandbox.Definitions.MyDefinitionManager.LoadScenarios(MyModContext context, DefinitionSet definitionSet, Boolean failOnDebug)
-   at Sandbox.Definitions.MyDefinitionManager.LoadScenarios()
-   at Sandbox.MySandboxGame.LoadData()
-   at Sandbox.MySandboxGame.Initialize()
-   at Sandbox.MySandboxGame.Run(Boolean customRenderLoop, Action disposeSplashScreen)
-   at SpaceEngineers.MyProgram.Main(String[] args)
-   at Loader.Load(String[] args)
-   at Loader.Main(String[] args)
-```
-
-This is the crashing method. What I figured out, is `CreateInstance<T>(builder.GetType())` returns null only when being called form this method. If I create a Harmony prefix to `InitScenarioDefinitions` and execute the first line in it, it returns a non-null object. What?
-
-```cs
-private static T InitDefinition<T>(MyModContext context, MyObjectBuilder_DefinitionBase builder) where T : MyDefinitionBase
-{
-    T val = MyDefinitionManagerBase.GetObjectFactory().CreateInstance<T>(builder.GetType());
-    val.Context = new MyModContext();
-    val.Context.Init(context);
-    if (!context.IsBaseGame)
-    {
-        UpdateModableContent(val.Context, builder);
-    }
-    val.Init(builder, val.Context);
-    if (MyFakes.ENABLE_ALL_IN_SURVIVAL)
-    {
-        val.AvailableInSurvival = true;
-    }
-    return val;
-}
-```
+When the Automatons update got released, I tried this again, and now it mostly works. Multiplayer does'nt, it crashes.
+Huge thanks to [.NET 7 Torch](https://github.com/PveTeam/Torch) for inspiration and scripting fix.
